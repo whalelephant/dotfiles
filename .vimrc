@@ -14,10 +14,11 @@ filetype plugin indent on
 
 " TODO: Pick a leader key
 " let mapleader = ","
-
+set path+=*
+set wildmenu
 " Security
 set modelines=0
-
+set autochdir
 " Show line numbers
 set number
 
@@ -39,7 +40,6 @@ set shiftwidth=2
 set softtabstop=2
 set expandtab
 set noshiftround
-
 " Cursor motion
 set scrolloff=3
 set backspace=indent,eol,start
@@ -77,7 +77,9 @@ map <leader><space> :let @/=''<cr> " clear search
 inoremap <F1> <ESC>:set invfullscreen<CR>a
 nnoremap <F1> :set invfullscreen<CR>
 vnoremap <F1> :set invfullscreen<CR>
-
+nnoremap <leader>d "_d
+xnoremap <leader>d "_d
+xnoremap <leader>p "_dP
 " Textmate holdouts
 
 " Formatting
@@ -97,4 +99,6 @@ let g:solarized_termcolors=256
 let g:solarized_termtrans=1
 " put https://raw.github.com/altercation/vim-colors-solarized/master/colors/solarized.vim
 " in ~/.vim/colors/ and uncomment:
-" colorscheme solarized
+colorscheme solarized
+let g:javascript_plugin_jsdoc = 1
+map <C-n> :NERDTreeToggle<CR>
