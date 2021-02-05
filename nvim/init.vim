@@ -1,4 +1,4 @@
-let mapleader = "\<Space>"
+let mapleader="\<Space>"
 
 " =============================================================================
 " # PLUGINS
@@ -57,6 +57,8 @@ call plug#end()
 syntax enable
 filetype plugin indent on
 
+" use editorconfig
+let g:EditorConfig_exclude_patterns = ['fugitive://.*']
 " =============================================================================
 " # GUI settings
 " =============================================================================
@@ -108,9 +110,23 @@ autocmd BufRead *.tex set filetype=tex
 autocmd BufRead *.trm set filetype=c
 autocmd BufRead *.xlsx.axlsx set filetype=ruby
 
+" Script plugins
+autocmd Filetype svelte,html,xml,xsl,php source ~/.config/nvim/scripts/closetag.vim
 
 " Follow Rust code style rules
-au Filetype rust source ~/.config/nvim/scripts/spacetab.vim
+autocmd Filetype rust source ~/.config/nvim/scripts/spacetab.vim
+
+" Use auocmd to force lightline update.
+autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
+
+" from http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
+if executable('ag')
+	set grepprg=ag\ --nogroup\ --nocolor
+endif
+if executable('rg')
+	set grepprg=rg\ --no-heading\ --vimgrep
+	set grepformat=%f:%l:%c:%m
+endif
 
 " =============================================================================
 " # Keys
@@ -154,9 +170,17 @@ nnoremap <expr> <C-p> (len(system('git rev-parse')) ? ':Files' : ':GFiles --excl
 nmap <leader>; :Buffers<CR>
 nnoremap <silent> <Leader>l :Lines<CR>
 
-" avoid accidental paste
-noremap P p
-map p <nop>
+" " Copy to clipboard
+vnoremap  <leader>y  "+y
+nnoremap  <leader>Y  "+yg_
+nnoremap  <leader>y  "+y
+nnoremap  <leader>yy  "+yy
+
+" " Paste from clipboard
+nnoremap <leader>p "+p
+nnoremap <leader>P "+P
+vnoremap <leader>p "+p
+vnoremap <leader>P "+P
 
 " Jump to start and end of line using the home row keys
 map H ^
@@ -164,11 +188,30 @@ map L $
 
 " <leader>s for Rg search
 noremap <leader>s :Rg
+let g:fzf_layout = { 'down': '~20%' }
+
+" Allow passing optional flags into the Rg command.
+"   Example: :Rg myterm -g '*.md'
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \ "rg --column --line-number --no-heading --color=always --smart-case " .
+  \ <q-args>, 1, fzf#vim#with_preview(), <bang>0)
+
+function! s:list_cmd()
+  let base = fnamemodify(expand('%'), ':h:.:S')
+  return base == '.' ? 'fd --type file --follow' : printf('fd --type file --follow | proximity-sort %s', shellescape(expand('%')))
+endfunction
+
+command! -bang -nargs=? -complete=dir Files
+  \ call fzf#vim#files(<q-args>, {'source': s:list_cmd(),
+  \                               'options': '--tiebreak=index'}, <bang>0)
 
 " Ctrl+h to stop searching
 vnoremap <leader>h :nohlsearch<cr>
 nnoremap <leader>h :nohlsearch<cr>
 
+" Clang format
+nnoremap <Leader>f :<C-u>ClangFormat<CR>
 " Quick-save
 nmap <leader>w :w<CR>
 
@@ -252,7 +295,9 @@ nnoremap <silent> <space>i  :call CocActionAsync('codeAction', '', 'Implement mi
 nnoremap <silent> <space>a  :CocAction<cr>
 
 " Rust
-
+" let g:rustfmt_command = 'rustfmt --config hard_tabs=true'
+let g:rustfmt_recommended_style = 1
 let g:rustfmt_autosave = 1
 let g:rustfmt_emit_files = 1
 let g:rustfmt_fail_silently = 0
+
