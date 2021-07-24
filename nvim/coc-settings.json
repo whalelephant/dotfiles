@@ -1,8 +1,19 @@
 {
 	"rust.clippy_preference": "on",
-	"rust.wait_to_build": 300,
 	"rust-analyzer.enable": true, 
+	"markdownlint.onSave": true,
+	"markdownlint.config": {
+		"line_length": false
+	},
 	"languageserver": {
+        "golang": {
+      "command": "gopls",
+      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
+      "filetypes": ["go"],
+      "initializationOptions": {
+        "usePlaceholders": true
+      }
+    },
         "ccls": {
             "command": "ccls",
             "filetypes": [
@@ -13,16 +24,34 @@
             ],
             "rootPatterns": [
                 ".ccls",
-                "compile_commands.json",
                 ".vim/",
                 ".git/",
                 ".hg/"
             ],
             "initializationOptions": {
+                "clang": {
+					"resourceDir": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/12.0.0/",
+					"extraArgs": [
+                        "-I/usr/local/include",
+                        "-I/usr/local/Cellar/llvm/11.0.0/include/c++/v1/",
+                        "-I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
+                        "-I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/12.0.0/include", 
+                        "-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include", 
+                        "-I/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+                        "-I/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+					]
+				},
                 "cache": {
                     "directory": "/tmp/ccls"
                 }
             }
+        },
+        "cadence": {
+            "command": "flow cadence language-server",
+            "filetypes":["cdc"],
+            "args":["-enableFlowClient=false"],
+            "trace.server":"verbose"
         }
-    }
+    },
+    "clangd.path": "/Users/belsy/.config/coc/extensions/coc-clangd-data/install/12.0.0/clangd_12.0.0/bin/clangd"
 }

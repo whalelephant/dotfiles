@@ -14,6 +14,7 @@ Plug 'ciaranm/securemodelines'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'justinmk/vim-sneak'
 Plug 'preservim/nerdtree'
+Plug 'tomlion/vim-solidity'
 
 " GUI enhancements
 Plug 'mhinz/vim-startify'    " pretty startup
@@ -38,6 +39,8 @@ Plug 'junegunn/fzf.vim'
 " Semantic language support
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'antoinemadec/coc-fzf'
+" Plug 'neovim/nvim-lspconfig'
+
 
 " Syntactic language support
 Plug 'cespare/vim-toml'
@@ -47,7 +50,7 @@ Plug 'rhysd/vim-clang-format'
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
 Plug 'joshdick/onedark.vim'
-Plug 'yuezk/vim-js'
+
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'leafOfTree/vim-svelte-plugin'
 Plug 'tpope/vim-fugitive'
@@ -70,6 +73,32 @@ set number " Also show current absolute line
 set showcmd " Show (partial) command in status line.
 set mouse=a " Enable mouse usage (all modes) in terminals
 set hidden " hides the buffer even with unsaved changes so you can retrieve it later"
+set smartindent
+set tabstop=4       " The width of a TAB is set to 4.
+                    " Still it is a \t. It is just that
+                    " Vim will interpret it to be having
+                    " a width of 4.
+set shiftwidth=4    " Indents will have a width of 4.
+set softtabstop=4   " Sets the number of columns for a TAB.
+set expandtab       " Expand TABs to spaces.
+set listchars=tab:»\ ,trail:¬ " So that we can see tabs 
+set list            " need for the above 
+
+let g:lightline = {
+      \ 'component_function': {
+      \   'filename': 'LightlineFilename',
+      \ }
+      \ }
+
+" This sets the filename path to the root of the git dir
+function! LightlineFilename()
+  let root = fnamemodify(get(b:, 'git_dir'), ':h')
+  let path = expand('%:p')
+  if path[:len(root)-1] ==# root
+    return path[len(root)+1:]
+  endif
+  return expand('%')
+endfunction
 
 syntax on
 colorscheme onedark
@@ -101,6 +130,24 @@ if has("autocmd")
   " https://stackoverflow.com/questions/31449496/vim-ignore-specifc-file-in-autocommand
   au BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 endif
+
+" Align table
+if exists(":Tab")
+    nmap <Leader>t :Tab /|
+endif
+
+inoremap <silent> <Bar>   <Bar><Esc>:call <SID>align()<CR>a
+
+function! s:align()
+  let p = '^\s*|\s.*\s|\s*$'
+  if exists(':Tabularize') && getline('.') =~# '^\s*|' && (getline(line('.')-1) =~# p || getline(line('.')+1) =~# p)
+    let column = strlen(substitute(getline('.')[0:col('.')],'[^|]','','g'))
+    let position = strlen(matchstr(getline('.')[0:col('.')],'.*|\s*\zs.*'))
+    Tabularize/|/l1
+    normal! 0
+    call search(repeat('[^|]*|',column).'\s\{-\}'.repeat('.',position),'ce',line('.'))
+  endif
+endfunction
 
 " Help filetype detection
 autocmd BufRead *.plot set filetype=gnuplot
@@ -294,10 +341,14 @@ nnoremap <silent> <space>i  :call CocActionAsync('codeAction', '', 'Implement mi
 " Show actions available at this location
 nnoremap <silent> <space>a  :CocAction<cr>
 
+
+" Remap keys for applying codeAction to the current buffer.
+nmap <leader>ac  <Plug>(coc-codeaction)
+" Apply AutoFix to problem on the current line.
+nmap <leader>qf  <Plug>(coc-fix-current)
+
 " Rust
 " let g:rustfmt_command = 'rustfmt --config hard_tabs=true'
 let g:rustfmt_recommended_style = 1
 let g:rustfmt_autosave = 1
 let g:rustfmt_emit_files = 1
-let g:rustfmt_fail_silently = 0
-
