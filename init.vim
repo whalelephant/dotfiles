@@ -51,7 +51,9 @@ Plug 'rust-lang/rust.vim'
 Plug 'rhysd/vim-clang-format'
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
-Plug 'joshdick/onedark.vim'
+
+Plug 'sainnhe/everforest'
+Plug 'rebelot/kanagawa.nvim'
 
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'leafOfTree/vim-svelte-plugin'
@@ -66,6 +68,8 @@ call plug#end()
 " editor
 syntax enable
 filetype plugin indent on
+set background=dark
+colorscheme kanagawa 
 
 " use editorconfig
 let g:EditorConfig_exclude_patterns = ['fugitive://.*']
@@ -76,18 +80,18 @@ set vb t_vb= " No more beeps
 set backspace=2 " Backspace over newlines
 set laststatus=2
 set relativenumber " Relative line numbers
-set number " Also show current absolute line
-set showcmd " Show (partial) command in status line.
-set mouse=a " Enable mouse usage (all modes) in terminals
-set hidden " hides the buffer even with unsaved changes so you can retrieve it later"
+" set number " Also show current absolute line
+" set showcmd " Show (partial) command in status line.
+" set mouse=a " Enable mouse usage (all modes) in terminals
+" set hidden " hides the buffer even with unsaved changes so you can retrieve it later"
 set smartindent
 set tabstop=4       " The width of a TAB is set to 4.
                     " Still it is a \t. It is just that
                     " Vim will interpret it to be having
                     " a width of 4.
-"set shiftwidth=4    " Indents will have a width of 4.
-"set softtabstop=4   " Sets the number of columns for a TAB.
-"set expandtab       " Expand TABs to spaces.
+" set shiftwidth=4    " Indents will have a width of 4.
+" set softtabstop=4   " Sets the number of columns for a TAB.
+" set expandtab       " Expand TABs to spaces.
 
 let g:lightline = {
       \ 'component_function': {
@@ -110,7 +114,6 @@ command! -nargs=0 Prettier :CocCommand prettier.formatFile
 
 
 syntax on
-colorscheme onedark
 " Completion
 " Better display for messages
 set cmdheight=2
@@ -125,6 +128,8 @@ let g:vim_svelte_plugin_load_full_syntax = 1
 " =============================================================================
 " # Autocommands
 " =============================================================================
+" No need to auto complete in Markdown
+autocmd FileType markdown let b:coc_suggest_disable = 1
 
 " Prevent accidental writes to buffers that shouldn't be edited
 autocmd BufRead *.orig set readonly
@@ -274,31 +279,51 @@ nmap <leader>w :w<CR>
 " nerdtree
 map <C-t> :NERDTreeToggle<CR>
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" 'Smart' nevigation
+" --------------------------------------------------------
+" SETTINGS START
+
+set completeopt=longest,menuone
+
+" SETTINGS END
+" --------------------------------------------------------
+
+" --------------------------------------------------------
+" COC-VIM TAB SETTINGS START
+
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
 " other plugin before putting this into your config.
+"
+" set backspace=indent
 inoremap <silent><expr> <TAB>
       \ pumvisible() ? "\<C-n>" :
       \ <SID>check_back_space() ? "\<TAB>" :
       \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
 function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 
-" Use <c-.> to trigger completion.
-inoremap <silent><expr> <c-.> coc#refresh()
+" Use <c-space> to trigger completion.
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
 
 " Use <cr> to confirm completion, `<C-g>u` means break undo chain at current
 " position. Coc only does snippet and additional edit on confirm.
+" <cr> could be remapped by other vim plugin, try `:verbose imap <CR>`.
 if exists('*complete_info')
   inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
 else
-  imap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+  inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 endif
+
+" COC-VIM TAB SETTINGS END
+" --------------------------------------------------------
 
 " Use `[g` and `]g` to navigate diagnostics
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
